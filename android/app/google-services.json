@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "500526047752",
+    "project_id": "corpus-ls",
+    "storage_bucket": "corpus-ls.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500526047752:android:1d69ab18a0d2a0443fe7bd",
+        "android_client_info": {
+          "package_name": "com.example.corpus_ls"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "500526047752-nlu3qsbonptln3vh4dpm8u9q0eu5cl3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7PXah2gNXPYbPtDl-QoJW2sXOkB3kE9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "500526047752-nlu3qsbonptln3vh4dpm8u9q0eu5cl3s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
