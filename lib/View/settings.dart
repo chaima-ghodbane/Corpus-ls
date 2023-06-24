@@ -1,12 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:corpus_ls/View/profile.dart';
+
+import 'package:corpus_ls/View/home.dart';
 import 'package:corpus_ls/View/notifications.dart';
 import 'package:get/get.dart';
 
+import 'inscription.dart';
+
 void main() {
-  return runApp(const MaterialApp(
+  return runApp( MaterialApp(
+
     home: Settings(),
   ));
 }
+
 
 
 class Settings extends StatefulWidget {
@@ -18,16 +26,20 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
 
+  bool _isSwitched = true;
+  bool _isSwitched1 = true;
+
+
+
   @override
   Widget build(BuildContext context) {
-    String? dropdownValue = '  Selectionner  ';
-    bool _isSwitched = false;
+
 
     return Scaffold(
 
 
       body: Container(
-        color:const Color(0xFFEFEEF3),
+
         child: ListView(
           children: [
             Column(
@@ -49,7 +61,6 @@ class _SettingsState extends State<Settings> {
                         color: Colors.grey,
                         onPressed: () {
                           Get.to(Notifications());
-
                         },
 
                       ),
@@ -82,48 +93,53 @@ class _SettingsState extends State<Settings> {
                 Row(
                   children: [
                     Expanded(
-                      flex : 2,
+                      flex : 1,
                       child: Container(
-                        margin: EdgeInsets.only(top: 30,left: 20,),
+                        margin: EdgeInsets.only(top: 30,left: 20),
 
-                        child: Text("Choisir la langue"),
+                        child: Text('Langue'.tr),
                       ),
                     ),
                     Expanded(
                       flex: 1,
                       child: Container(
-                        margin: EdgeInsets.only(top: 30,right: 3,),
+                        margin: EdgeInsets.only(top: 30,right: 3,left: 40),
+                        padding: EdgeInsets.only(left: 5),
 
 
-                        child: DropdownButton<String>(
-                          underline: null,
-                          value: dropdownValue,
-                          icon: Icon(Icons.arrow_drop_down_outlined,color: const Color(0xFF36ACEF) ,),
-                          iconSize: 24,
+                        child: Container
 
-                          elevation: 16,
-                          style: TextStyle(color: const Color(0xFF646E82) ),
+                          (
 
-                          onChanged: ( newValue) {
-                            setState(() {
-                              dropdownValue = newValue;
-                            });
+                          padding: EdgeInsets.only(left: 7),
+                         child : DropdownButton(
+                           value: Get.locale?.languageCode,
+                           items: [
+                             DropdownMenuItem(
+                               child: Text('English'),
+                               value: 'en',
+                             ),
+                             DropdownMenuItem(
+                               child: Text('Français'),
+                               value: 'fr',
+                             ),
+                           ],
+                           onChanged: (value) {
+                             if (value == 'en') {
+                               Get.updateLocale(Locale('en', 'US'));
+                             }
+                             else if (value == 'fr') {
+                               Get.updateLocale(Locale('fr', 'FR'));
+                             }
+                             print(Get.locale); // Add this line to check the locale
+                           },
+                         ),
 
-                          },
 
-
-                          items: <String>['  Selectionner  ', 'Français', 'Anglais', 'Espagnol']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          })
-                              .toList(),
+                          height: 35,
+                          width: 120,
                         ),
 
-                        height: 35,
-                        width: 125,
 
 
 
@@ -167,7 +183,7 @@ class _SettingsState extends State<Settings> {
                       child: Container(
 
                         margin: EdgeInsets.only(top: 30,left: 20),
-                        child: Text("Activer les notifications"),
+                        child: Text('notifications'.tr),
                       ),
                     ),
                     Expanded(
@@ -175,9 +191,12 @@ class _SettingsState extends State<Settings> {
                       child: Container(
 
                         margin: EdgeInsets.only(left: 130,top: 20),
+
+
                         child: Switch(
                           value: _isSwitched,
-                          onChanged: (bool value) {
+                          onChanged: ( bool value) {
+                            print("Switch changed to $value");
                             setState(() {
                               _isSwitched = value;
                             });
@@ -201,7 +220,7 @@ class _SettingsState extends State<Settings> {
                         margin: EdgeInsets.only(top: 30,left: 20),
 
 
-                        child: Text("Activer le dark mode"),
+                        child: Text('darkmode'.tr),
                       ),
                     ),
                     Expanded(
@@ -209,20 +228,51 @@ class _SettingsState extends State<Settings> {
                       child: Container(
                         margin: EdgeInsets.only(left: 130,top: 20),
                         child: Switch(
-                          value: _isSwitched,
-                          onChanged: (bool value) {
+                          value: _isSwitched1,
+                          onChanged: (bool value1) {
+                            print("Switch changed to $value1");
                             setState(() {
-                              _isSwitched = value;
+                              _isSwitched1 = value1;
                             });
                           },
                         ),
                       ),
                     ),
 
+
+
+
                   ],
-                )
+                ),
 
                 //////////////////////
+
+                Container(
+
+                  margin: EdgeInsets.only(left: 20),
+                  child: Row(
+                  children: [
+                    Expanded(
+                      flex: 6,
+                      child: Text('Déconnexion'),
+                    ),
+                    Expanded(
+                        flex: 1,
+                        child: IconButton(
+                            onPressed: ()
+                            {
+                              FirebaseAuth.instance.signOut().then((value) {
+                                Get.to(se_connecter());
+                                print("Signed out");
+                              });
+                              
+                            },
+                            icon: Icon(Icons.logout),
+
+                        )
+                    )
+                  ],
+                ),)
 
 
 
@@ -231,7 +281,85 @@ class _SettingsState extends State<Settings> {
           ],
         ),
 
-      )
+
+      ),
+      bottomNavigationBar: SizedBox(
+          width: 200,
+
+          child:
+
+          Container(
+            margin: EdgeInsets.only(left: 20,right: 20,bottom: 20),
+            decoration: BoxDecoration(
+
+
+              borderRadius: BorderRadius.circular(15),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey[300]!,
+                  blurRadius: 10,
+                  offset: Offset(5, 5),
+                ),
+                BoxShadow(
+                  color: Colors.white,
+                  blurRadius: 10,
+                  offset: Offset(-5, -5),
+                ),
+              ],
+            ),
+
+
+
+            child:  Row(
+              children: [
+                Expanded(
+                  child: IconButton(
+
+
+                    icon: Icon(Icons.home),
+
+                    iconSize: 30,
+                    color: Colors.grey,
+                    onPressed: () {
+                     Get.to(MyHomePage());
+                    },
+
+                  ),
+                ),
+
+                Expanded(
+                  child:  IconButton(
+                    //padding: EdgeInsets.only(top: 75),
+
+                    icon: Icon(Icons.person_2_rounded),
+
+                    iconSize: 30,
+                    color: Colors.grey,
+                    onPressed: () {
+                      Get.to(Profile());
+                    },
+
+                  ),
+                ),
+                Expanded(
+                  child:  IconButton(
+                    // padding: EdgeInsets.only(top: 75),
+
+                    icon: Icon(Icons.settings,color: const Color(0xFF05acb2),),
+
+                    iconSize: 30,
+                    color: Colors.grey,
+                    onPressed: () {
+                      Get.to(Settings());
+                    },
+
+                  ),
+                ),
+              ],
+            ),
+          )
+      ),
 
 
 

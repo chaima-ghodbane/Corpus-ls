@@ -1,45 +1,129 @@
+import 'package:camera/camera.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:corpus_ls/View/notifications.dart';
 import 'package:get/get.dart';
-//import 'package:corpus_ls/View/try.dart';
+import 'package:corpus_ls/View/settings.dart';
+import 'package:corpus_ls/View/home.dart';
+import 'package:corpus_ls/View/profile.dart';
+import 'package:corpus_ls/View/intro2.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+
+
 
 
 void main() {
   return runApp(const MaterialApp(
-    home: formation1(),
+    home: Formation1(),
   ));
 }
 
-
-
-
-class formation1 extends StatefulWidget {
-  const formation1({Key? key}) : super(key: key);
-
+class Formation1 extends StatefulWidget {
+  const Formation1({Key? key}) : super(key: key);
 
   @override
-
-  _formation1State createState() => _formation1State();
+  _Formation1State createState() => _Formation1State();
 }
 
-class _formation1State extends State<formation1> {
+class _Formation1State extends State<Formation1> {
 
-  int _selectedIndex = 0;
+  Future<String?> uploadVideoToFirebase(File videoFile) async {
+    try {
+      // Upload video to Firebase Storage
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      firebase_storage.Reference reference =
+      firebase_storage.FirebaseStorage.instance
+          .refFromURL('gs://corpusls-a0ac8.appspot.com')
+          .child(fileName);
+      firebase_storage.UploadTask uploadTask = reference.putFile(videoFile);
+      firebase_storage.TaskSnapshot storageSnapshot =
+      await uploadTask.whenComplete(() {});
 
+      // Retrieve download URL of the uploaded video
+      String downloadURL = await storageSnapshot.ref.getDownloadURL();
 
-  // List of widgets that correspond to each item in the navigation bar
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text('Home Page'),
-    Text('Search Page'),
-    Text('Profile Page'),
-  ];
-
-  // Handler for when an item in the navigation bar is selected
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+      return downloadURL;
+    } catch (error) {
+      print('Error uploading video: $error');
+      return null;
+    }
   }
+
+  Future<void> storeVideoMetadata(String title, String downloadURL) async {
+    try {
+      // Store video metadata in Firebase Firestore
+      await FirebaseFirestore.instance.collection('videos').add({
+        'title': title,
+        'videoUrl': downloadURL,
+      });
+    } catch (error) {
+      print('Error storing video metadata: $error');
+    }
+  }
+
+  Future<void> handleVideoUpload(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp4'],
+      allowMultiple: false// Adjust the allowed file extensions if needed
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File videoFile = File(result.files.single.path!);
+
+      String? downloadURL = await uploadVideoToFirebase(videoFile);
+      if (downloadURL != null) {
+        // Prompt user for video title
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            String title = '';
+
+            return AlertDialog(
+              title: Text('Video Title'),
+              content: TextField(
+                onChanged: (value) {
+                  title = value;
+                },
+              ),
+              actions: [
+                ElevatedButton(
+                  child: Text('Upload'),
+                  onPressed: () {
+                    storeVideoMetadata(title, downloadURL);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Failed to upload video.'),
+              actions: [
+                ElevatedButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +171,7 @@ class _formation1State extends State<formation1> {
                           width: 180,
                           margin: EdgeInsets.only(left: 25,right: 25),
                           child: Center(
-                            child: Text("LICENCE DE CODEUR EN LFPS",style: TextStyle(fontSize: 16,
+                            child: Text('titreform1'.tr,style: TextStyle(fontSize: 16,
                               color: const Color(0xFF646E82),)),
                           )
 
@@ -135,7 +219,6 @@ class _formation1State extends State<formation1> {
                 child: Row(
                   children: [
                     Container(
-
                       width:55,
                       height :55,
                       margin: EdgeInsets.only(left: 10),
@@ -176,10 +259,7 @@ class _formation1State extends State<formation1> {
                             height:20,
                             width: 80,
                           ),
-
-
                         ),
-
                       ],
                     ),
                     Container(
@@ -286,8 +366,6 @@ class _formation1State extends State<formation1> {
                                                   Container(
 
                                                       decoration: BoxDecoration(
-
-
                                                         borderRadius: BorderRadius.circular(15),
                                                         color: Colors.white,
                                                         boxShadow: [
@@ -309,8 +387,6 @@ class _formation1State extends State<formation1> {
                                                             (
                                                             children: [
                                                               Container(
-
-
                                                                 width:55,
                                                                 height :55,
                                                                 margin: EdgeInsets.only(left: 10,bottom: 10),
@@ -537,7 +613,7 @@ class _formation1State extends State<formation1> {
                         margin: EdgeInsets.only(left: 30),
                         width: 205,
                         height: 35,
-                        child: Text("Leçons",style: TextStyle(fontSize: 22,color: const Color(0xFF61DBD0) ),)
+                        child: Text("Leçons",style: TextStyle(fontSize: 22,color: const Color(0xFF05acb2), ),)
                     ),
 
 
@@ -547,9 +623,11 @@ class _formation1State extends State<formation1> {
                     Container(
                       width: 50,
                       height: 50,
-                      child: IconButton(onPressed: (){
-                        //Get.to(MyHomePage());
-                      }, icon: Icon(Icons.video_call),color: const Color(0xFF61DBD0)),
+                      child: IconButton(onPressed: ()
+                      {
+                        handleVideoUpload(context);
+                      },
+                        icon: Icon(Icons.video_call),color: const Color(0xFF05acb2),),
                       decoration: BoxDecoration(
 
                         borderRadius: BorderRadius.circular(15),
@@ -621,13 +699,22 @@ class _formation1State extends State<formation1> {
                           children: [
                             Row(
                               children: [
-                                Container(
+                                GestureDetector(
+                                  child:   Container(
 
-                                  margin: EdgeInsets.only(top: 15,left:33),
-                                  child: Text("1",style: TextStyle(fontSize: 50,
-                                      fontWeight: FontWeight.w400,color: Color(0XFF646E82))),
+                                    margin: EdgeInsets.only(top: 15,left:33),
+                                    child: Text("1",style: TextStyle(fontSize: 50,
+                                        fontWeight: FontWeight.w400,color: Color(0XFF646E82))),
 
+                                  ),
+
+                                  onTap: () {
+
+
+                                    Get.to(VideoPlayerWidget(videoUrl: 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',));
+                                  },
                                 ),
+
                                 Container(
                                     margin: EdgeInsets.only(left: 24,top: 15),
                                     child:
@@ -806,37 +893,82 @@ class _formation1State extends State<formation1> {
       ),
 
 
-      bottomNavigationBar:
-      BottomNavigationBar(
+      bottomNavigationBar: SizedBox(
+          width: 200,
 
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
+          child:
+
+          Container(
+            margin: EdgeInsets.only(left: 20,right: 20,bottom: 20),
+            decoration: BoxDecoration(
+
+
+              borderRadius: BorderRadius.circular(15),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey[300]!,
+                  blurRadius: 10,
+                  offset: Offset(5, 5),
+                ),
+                BoxShadow(
+                  color: Colors.white,
+                  blurRadius: 10,
+                  offset: Offset(-5, -5),
+                ),
+              ],
+            ),
 
 
 
+            child:  Row(
+              children: [
+                Expanded(
+                  child: IconButton(
 
-        items:  <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
 
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+                    icon: Icon(Icons.home),
 
-        currentIndex: _selectedIndex,
+                    iconSize: 30,
+                    color: Colors.grey,
+                    onPressed: () {
+                      Get.to(MyHomePage());
+                    },
 
-        onTap: _onItemTapped,
+                  ),
+                ),
 
+                Expanded(
+                  child:  IconButton(
+                    //padding: EdgeInsets.only(top: 75),
+
+                    icon: Icon(Icons.person_2_rounded),
+
+                    iconSize: 30,
+                    color: Colors.grey,
+                    onPressed: () {
+                      Get.to(Profile());
+                    },
+
+                  ),
+                ),
+                Expanded(
+                  child:  IconButton(
+                    // padding: EdgeInsets.only(top: 75),
+
+                    icon: Icon(Icons.settings),
+
+                    iconSize: 30,
+                    color: Colors.grey,
+                    onPressed: () {
+                     // Get.to(Settings());
+                    },
+
+                  ),
+                ),
+              ],
+            ),
+          )
       ),
 
 
